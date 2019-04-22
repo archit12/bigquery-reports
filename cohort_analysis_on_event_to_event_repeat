@@ -1,5 +1,6 @@
 
 #standardSQL
+# select users who have done the first_event (first_open in this case)
 WITH events as (
   SELECT user_pseudo_id,
     FORMAT_DATE('%Y-%V', DATE(TIMESTAMP_MICROS(CAST(event_timestamp as INT64)))) AS period
@@ -7,8 +8,10 @@ WITH events as (
   WHERE 
   events._TABLE_SUFFIX BETWEEN '20190401' AND '20190415'
   AND event_name ='first_open'
-  AND params.key='previous_first_open_count' AND params.value.int_value=0
+  # actual first_opens have `previous_first_open_count` set to 0
+  AND params.key='previous_first_open_count' AND params.value.int_value=0 
   GROUP BY user_pseudo_id, period),
+# users who did the repeat event
 returning_events as (
   SELECT user_pseudo_id,
     FORMAT_DATE('%Y-%V', DATE(TIMESTAMP_MICROS(CAST(event_timestamp as INT64)))) AS period
@@ -30,6 +33,7 @@ cohorts_size AS (
   JOIN periods ON periods.period = cohorts.cohort
   GROUP BY cohort, num
 ), 
+# joining first_event users with repeat_event users on users and period to calculate retention
 retention AS (
   SELECT cohort, returning_events.period AS period, periods.num AS num, COUNT(DISTINCT cohorts.user_pseudo_id) AS ids
   FROM periods JOIN returning_events ON returning_events.period = periods.period
