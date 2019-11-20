@@ -4,7 +4,7 @@
 WITH events as (
   SELECT user_pseudo_id,
     FORMAT_DATE('%Y-%V', DATE(TIMESTAMP_MICROS(CAST(event_timestamp as INT64)))) AS period
-  FROM `solid-coral-706.analytics_151368983.events_*` AS events, unnest(event_params) as params
+  FROM `solid-coral.analytics.events_*` AS events, unnest(event_params) as params
   WHERE 
   events._TABLE_SUFFIX BETWEEN '20190401' AND '20190415'
   AND event_name ='first_open'
@@ -15,7 +15,7 @@ WITH events as (
 returning_events as (
   SELECT user_pseudo_id,
     FORMAT_DATE('%Y-%V', DATE(TIMESTAMP_MICROS(CAST(event_timestamp as INT64)))) AS period
-  FROM `solid-coral-706.analytics_151368983.events_*` AS events
+  FROM `solid-coral.analytics.events_*` AS events
   WHERE 
   events._TABLE_SUFFIX BETWEEN '20190401' AND '20190415'
   AND event_name='sign_up' or event_name = 'login'
